@@ -1,0 +1,18 @@
+{
+    "name": "metric-watcher",
+    "version": "0.0.1",
+    "description": "UDP and HTTP servers to collect and display user metrics",
+    "license": "BSD",
+    "author": {
+        "name": "Roman Imankulov",
+        "email": "roman.imankulov@gmail.com"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "http://github.com/Doist/metric-watcher.git"
+    },
+    "private": true,
+    "dependencies": {
+        "connect": ""
+    }
+}
