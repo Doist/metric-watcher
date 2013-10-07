@@ -63,6 +63,7 @@ startHTTP = (http_port) ->
     connect()
         .use(connect.logger('dev'))
         .use(connect.static("#{__dirname}/public"))
+        .use(connect.static("#{__dirname}/components"))
         .use((req, res) ->
             url_data = url.parse(req.url);
             handler = http_handlers[url_data.pathname]
