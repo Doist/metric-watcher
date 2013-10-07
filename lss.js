@@ -3,7 +3,7 @@ var LimitedSizeStore;
 
 LimitedSizeStore = (function() {
   function LimitedSizeStore(limit, ensure_limit_rate) {
-    this.limit = limit != null ? limit : 10000;
+    this.limit = limit != null ? limit : 1000;
     this.ensure_limit_rate = ensure_limit_rate != null ? ensure_limit_rate : 0.01;
     this.store = {};
     this.ts = {};

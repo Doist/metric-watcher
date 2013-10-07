@@ -1,7 +1,7 @@
 
 class LimitedSizeStore
 
-    constructor: (@limit=10000, @ensure_limit_rate=0.01) ->
+    constructor: (@limit=1000, @ensure_limit_rate=0.01) ->
         @store = {}
         @ts = {}
 
