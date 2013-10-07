@@ -13,6 +13,7 @@
     },
     "private": true,
     "dependencies": {
-        "connect": ""
+        "connect": "",
+        "optimist": ""
     }
 }

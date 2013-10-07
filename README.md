@@ -15,6 +15,12 @@ answering on following types of questions:
 2. What's the average number of queries per second for users? Are there any
    users who make much more queries than the average.
 
+Starting the server
+-------------------
+
+    node metric_watcher.js [--tcp-port 1234] [--udp-port 1234]
+
+
 UDP server and protocol
 ------------------------
 

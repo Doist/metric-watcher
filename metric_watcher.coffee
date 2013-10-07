@@ -2,6 +2,7 @@ url = require("url")
 http = require("http")
 connect = require("connect")
 dgram = require("dgram")
+argv = require('optimist').argv
 lss = require("./lss.js")
 
 stores = {}
@@ -115,5 +116,5 @@ getStore = (key) ->
         stores[key] = store
     return store
 
-startUDP(1234)
-startHTTP(1234)
+startUDP(argv['udp-port'] or 1234)
+startHTTP(argv['http-port'] or 1234)
