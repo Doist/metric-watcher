@@ -53,8 +53,8 @@ udp_handlers = {
     gamma0 = parseFloat(args[3]) || 1.0;
     timestamp = parseFloat(args[4]) || new Date().getTime() / 1000;
     reset = Boolean(parseInt(args[5])) || false;
-    if (key && value !== NaN) {
-      return gauge(key, id, value, gamma0, timestamp, reset);
+    if (key) {
+      return counter(key, id, gamma0, timestamp, reset);
     }
   }
 };
@@ -108,7 +108,7 @@ gauge = function(key, id, value, gamma0, timestamp, reset) {
   id = id.toString();
   store = getStore(key);
   _ref = store.get(id), prev_value = _ref[0], prev_timestamp = _ref[1];
-  if (reset || !prev_timestamp) {
+  if (reset || prev_value === void 0) {
     store.set(id, value, timestamp);
     return value;
   }
@@ -127,7 +127,7 @@ counter = function(key, id, gamma0, timestamp, reset) {
   store = getStore(key);
   _ref = store.get(id), prev_value = _ref[0], prev_timestamp = _ref[1];
   if (reset || !prev_timestamp) {
-    value = 1.0;
+    value = void 0;
   } else {
     value = timestamp - prev_timestamp;
   }

@@ -36,8 +36,8 @@ udp_handlers = {
         gamma0 = parseFloat(args[3]) or 1.0
         timestamp = parseFloat(args[4]) or new Date().getTime() / 1000
         reset = Boolean(parseInt(args[5])) or false
-        if key and value != NaN
-            gauge(key, id, value, gamma0, timestamp, reset)
+        if key
+            counter(key, id, gamma0, timestamp, reset)
 }
 
 
@@ -83,7 +83,7 @@ gauge = (key, id, value, gamma0, timestamp, reset) ->
 
     store = getStore(key)
     [prev_value, prev_timestamp] = store.get(id)
-    if reset or not prev_timestamp
+    if reset or prev_value is undefined
         # shortcut, there was nothing in there
         store.set(id, value, timestamp)
         return value
@@ -103,7 +103,7 @@ counter = (key, id, gamma0, timestamp, reset) ->
 
     [prev_value, prev_timestamp] = store.get(id)
     if reset or not prev_timestamp
-        value = 1.0
+        value = undefined
     else
         value = timestamp - prev_timestamp
 
