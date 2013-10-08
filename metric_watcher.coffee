@@ -1,3 +1,4 @@
+fs = require("fs")
 url = require("url")
 http = require("http")
 connect = require("connect")
@@ -40,6 +41,19 @@ udp_handlers = {
             counter(key, id, gamma0, timestamp, reset)
 }
 
+
+initStores = (filename) ->
+    if not filename
+        return
+    fs.readFile(filename, 'utf8', (err, data) ->
+        if err
+            console.log('Error: ' + err)
+            return
+        data = JSON.parse(data)
+        for key, value of data
+            store = getStore(key)
+            store.load(value)
+    )
 
 startUDP = (udp_port) ->
     socket = dgram.createSocket("udp4")
@@ -117,5 +131,6 @@ getStore = (key) ->
         stores[key] = store
     return store
 
+initStores(argv['stores'])
 startUDP(argv['udp-port'] or 1234)
 startHTTP(argv['http-port'] or 1234)

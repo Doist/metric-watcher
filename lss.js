@@ -62,6 +62,18 @@ LimitedSizeStore = (function() {
     return ret;
   };
 
+  LimitedSizeStore.prototype.load = function(json) {
+    var key, value, _results;
+
+    _results = [];
+    for (key in json) {
+      value = json[key];
+      this.store[key] = value[0];
+      _results.push(this.ts[key] = value[1]);
+    }
+    return _results;
+  };
+
   return LimitedSizeStore;
 
 })();

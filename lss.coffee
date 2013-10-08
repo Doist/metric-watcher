@@ -32,4 +32,13 @@ class LimitedSizeStore
             ret[key] = @get(key)
         return ret
 
+    load: (json) ->
+        # Load data to store from JSON object
+        # json object is a result of toJSON call:
+        # key -> (value, timestamp)
+        for key, value of json
+            @store[key] = value[0]
+            @ts[key] = value[1]
+
+
 exports.LimitedSizeStore = LimitedSizeStore
