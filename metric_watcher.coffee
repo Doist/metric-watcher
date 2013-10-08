@@ -14,9 +14,22 @@ error_handler = (req, res) ->
 
 
 http_handlers = {
-    "/dump_stores": (req, res) ->
+    "/metrics/dump": (req, res) ->
         res.writeHead(200, {'Content-Type': 'application/json'})
         res.end(JSON.stringify(stores))
+    "/metrics": (req, res) ->
+        res.writeHead(200, {'Content-Type': 'application/json'})
+        keys = {}
+        for key, value of stores
+            keys[key] = value.keys().length
+        res.end(JSON.stringify(keys))
+    "/metrics/get": (req, res) ->
+        name = req.query.name
+        store = stores[name]
+        if not store
+            return error_handler(req, res)
+        res.writeHead(200, {'Content-Type': 'application/json'})
+        res.end(JSON.stringify(store.values()))
 }
 
 udp_handlers = {
@@ -96,6 +109,7 @@ startHTTP = (http_port) ->
         .use(connect.logger('dev'))
         .use(connect.static("#{__dirname}/public"))
         .use(connect.static("#{__dirname}/components"))
+        .use(connect.query())
         .use((req, res) ->
             url_data = url.parse(req.url);
             handler = http_handlers[url_data.pathname]
@@ -137,7 +151,7 @@ counter = (key, id, gamma0, timestamp, reset) ->
     if reset or not prev_timestamp
         value = undefined
     else
-        value = timestamp - prev_timestamp
+        value = 1 / (timestamp - prev_timestamp)
 
     return gauge(key, id, value, gamma0, timestamp, reset)
 
@@ -145,7 +159,7 @@ counter = (key, id, gamma0, timestamp, reset) ->
 getStore = (key) ->
     store = stores[key]
     if not store
-        store = new lss.LimitedSizeStore()
+        store = new lss.LimitedSizeStore(argv['store-limit'])
         stores[key] = store
     return store
 

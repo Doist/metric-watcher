@@ -9,6 +9,20 @@ LimitedSizeStore = (function() {
     this.ts = {};
   }
 
+  LimitedSizeStore.prototype.keys = function() {
+    var key, _results;
+
+    _results = [];
+    for (key in this.store) {
+      _results.push(key);
+    }
+    return _results;
+  };
+
+  LimitedSizeStore.prototype.values = function() {
+    return this.store;
+  };
+
   LimitedSizeStore.prototype.set = function(key, value, ts) {
     if (ts == null) {
       ts = new Date().getTime() / 1000;

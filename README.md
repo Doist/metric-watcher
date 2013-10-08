@@ -18,8 +18,20 @@ answering on following types of questions:
 Starting the server
 -------------------
 
-    node metric_watcher.js [--tcp-port 1234] [--udp-port 1234]
+Usage:
 
+    node metric_watcher.js [--tcp-port 1234] \
+            [--udp-port 1234] \
+            [--store-limit 1000] \
+            [--stores filename.json]
+
+All arguments are optional:
+
+- `--tcp-port`: TCP port of HTTP server (by default, 1234)
+- `--udp-port`: port of UDP server (by default, 1234)
+- `--store-limit`: limit for each store, in items (by default, 1000)
+- `--stores`: stores filename, where data will be read from on startup, and
+    written to on shutdown
 
 UDP server and protocol
 ------------------------
@@ -43,7 +55,7 @@ where
 
 - `gauge`: should be provided exactly as is, it's the metric type
 - `<key>`: (string) metric name
-- `<id>`: (int or string) user id
+- `<id>`: (int or string) user id (or email, or other type of unique identifier)
 - `<value>`: (float) current metric value
 - `[gamma0]`: (optional, positive float). Describes how previous values
   affect current one (smoothing factor). The bigger gamma0 is, the bigger
@@ -67,5 +79,11 @@ field.
 HTTP server
 ------------
 
-TODO
+RESTful API
+`````````````
 
+- `/metrics/dump`: get the dump of metrics, as stored in json dump whe
+  `--stores` option is used
+- `/metrics`: get the dict `metric name -> number of unique element in metric`
+- `/metrics/get?name=<metric_name>`: for a given metric name get the dict
+  `user id -> metric value`

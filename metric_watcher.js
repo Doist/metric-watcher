@@ -25,11 +25,37 @@ error_handler = function(req, res) {
 };
 
 http_handlers = {
-  "/dump_stores": function(req, res) {
+  "/metrics/dump": function(req, res) {
     res.writeHead(200, {
       'Content-Type': 'application/json'
     });
     return res.end(JSON.stringify(stores));
+  },
+  "/metrics": function(req, res) {
+    var key, keys, value;
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    keys = {};
+    for (key in stores) {
+      value = stores[key];
+      keys[key] = value.keys().length;
+    }
+    return res.end(JSON.stringify(keys));
+  },
+  "/metrics/get": function(req, res) {
+    var name, store;
+
+    name = req.query.name;
+    store = stores[name];
+    if (!store) {
+      return error_handler(req, res);
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    return res.end(JSON.stringify(store.values()));
   }
 };
 
@@ -131,7 +157,7 @@ startUDP = function(udp_port) {
 };
 
 startHTTP = function(http_port) {
-  connect().use(connect.logger('dev')).use(connect["static"]("" + __dirname + "/public")).use(connect["static"]("" + __dirname + "/components")).use(function(req, res) {
+  connect().use(connect.logger('dev')).use(connect["static"]("" + __dirname + "/public")).use(connect["static"]("" + __dirname + "/components")).use(connect.query()).use(function(req, res) {
     var handler, url_data;
 
     url_data = url.parse(req.url);
@@ -173,7 +199,7 @@ counter = function(key, id, gamma0, timestamp, reset) {
   if (reset || !prev_timestamp) {
     value = void 0;
   } else {
-    value = timestamp - prev_timestamp;
+    value = 1 / (timestamp - prev_timestamp);
   }
   return gauge(key, id, value, gamma0, timestamp, reset);
 };
@@ -183,7 +209,7 @@ getStore = function(key) {
 
   store = stores[key];
   if (!store) {
-    store = new lss.LimitedSizeStore();
+    store = new lss.LimitedSizeStore(argv['store-limit']);
     stores[key] = store;
   }
   return store;

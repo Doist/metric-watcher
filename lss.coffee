@@ -5,6 +5,12 @@ class LimitedSizeStore
         @store = {}
         @ts = {}
 
+    keys: () ->
+        (key for key of @store)
+
+    values: () ->
+        @store
+
     set: (key, value, ts=new Date().getTime() / 1000) ->
         key = key.toString()
         @store[key] = value
