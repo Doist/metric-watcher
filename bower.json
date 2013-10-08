@@ -1,0 +1,17 @@
+{
+  "name": "metric-watcher",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Doist/metric-watcher",
+  "authors": [
+    "Roman Imankulov <roman.imankulov@gmail.com>"
+  ],
+  "description": "Metric Watcher",
+  "main": "metric_watcher.js",
+  "license": "BSD",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
