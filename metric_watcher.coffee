@@ -19,7 +19,6 @@ http_handlers = {
         res.end(JSON.stringify(stores))
 }
 
-
 udp_handlers = {
     "gauge": (args) ->
         key = args[1]
@@ -41,7 +40,25 @@ udp_handlers = {
             counter(key, id, gamma0, timestamp, reset)
 }
 
+# on exit handler: try to dump data to a file
 
+shutdownStores = () ->
+    stores_file = argv['stores']
+    if not stores_file
+        return
+    fs.writeFile(stores_file, JSON.stringify(stores), (err) ->
+        if err
+            console.log("Error: #{err}")
+        else
+            console.log("Stores saved to #{stores_file}")
+        process.exit()
+    )
+
+process.on('SIGINT', shutdownStores)
+process.on('SIGTERM', shutdownStores)
+
+
+# on startup handler: try to load stores from a file
 initStores = (filename) ->
     if not filename
         return
@@ -53,6 +70,7 @@ initStores = (filename) ->
         for key, value of data
             store = getStore(key)
             store.load(value)
+        console.log("Stores loaded from #{filename}")
     )
 
 startUDP = (udp_port) ->
