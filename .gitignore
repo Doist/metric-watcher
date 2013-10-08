@@ -1,1 +1,7 @@
+# server-side dependencies
+# "npm install ."
 /node_modules
+
+# client-side dependencies
+# "bower install"
+/components
