@@ -157,7 +157,7 @@ startUDP = function(udp_port) {
 };
 
 startHTTP = function(http_port) {
-  connect().use(connect.logger('dev')).use(connect["static"]("" + __dirname + "/public")).use(connect["static"]("" + __dirname + "/components")).use(connect.query()).use(function(req, res) {
+  connect().use(connect.logger('dev')).use(connect["static"]("" + __dirname + "/public")).use(connect["static"]("" + __dirname + "/bower_components")).use(connect.query()).use(function(req, res) {
     var handler, url_data;
 
     url_data = url.parse(req.url);
