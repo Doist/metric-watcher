@@ -58,7 +58,9 @@ udp_handlers = {
 shutdownStores = () ->
     stores_file = argv['stores']
     if not stores_file
+        process.exit()
         return
+
     fs.writeFile(stores_file, JSON.stringify(stores), (err) ->
         if err
             console.log("Error: #{err}")

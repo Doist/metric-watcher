@@ -1,17 +1,80 @@
+
+class MetricWatcher
+
+    constructor: (@plotter) ->
+        @chosen_metrics = []
+
+    init: () ->
+        @metrics_container = $("#id-metrics-container")
+        $.getJSON("/metrics/dump", (data) =>
+            @stores = data
+            @displayMetricsList()
+        )
+
+    displayMetricsList: () ->
+        @metrics_container.empty()
+        keys = (name for name of @stores)
+        keys.sort()
+        for name in keys
+            count = (id for id of @stores[name]).length
+            li = $('<li class="metric-list-item">')
+                    .attr("data-name", name)
+
+            a = $('<a href="">')
+                    .text("#{name} ")
+                    .attr("data-name", name)
+                    .click((e) =>
+                        @toggleMetric($(e.delegateTarget).attr("data-name"))
+                    )
+                    .append($('<span class="badge">').text(count))
+            @metrics_container.append(li.append(a))
+
+    toggleMetric: (name) ->
+        idx = $.inArray(name, @chosen_metrics)
+        if idx > -1
+            @chosen_metrics.splice(idx, 1)
+        else
+            @chosen_metrics.push(name)
+            if @chosen_metrics.length > 2
+                @chosen_metrics.shift()
+        @onChosenMetricUpdated_markList()
+        @onChosenMetricUpdated_redraw()
+        return false
+
+    onChosenMetricUpdated_markList: () ->
+        $("li.metric-list-item").removeClass("active")
+        for metric in @chosen_metrics
+            $("li[data-name=\"#{metric}\"]").addClass("active")
+
+    onChosenMetricUpdated_redraw: () ->
+        if @chosen_metrics.length == 0
+            return
+
+        if @chosen_metrics.length == 2
+            xdata = map_object(@stores[@chosen_metrics[0]], (v) -> v[0])
+            xlabel = @chosen_metrics[0]
+            ydata = map_object(@stores[@chosen_metrics[1]], (v) -> v[0])
+            ylabel = @chosen_metrics[1]
+        else if @chosen_metrics.length == 1
+            xdata = map_object(@stores[@chosen_metrics[0]], (v) -> Math.random())
+            xlabel = 'random'
+            ydata = map_object(@stores[@chosen_metrics[0]], (v) -> v[0])
+            ylabel = @chosen_metrics[0]
+
+        plotter.plotData(xdata, ydata, xlabel, ylabel)
+
+
+
 class Plotter
 
     constructor: (@svg=d3.select("svg"), @r=3, @pad=40, @left_pad=60) ->
         @w = $("svg").width()
         @h = $("svg").height()
 
-    plot: (metric1, metric2) ->
-        $.when(
-            $.getJSON("/metrics/get?name=#{metric1}"),
-            $.getJSON("/metrics/get?name=#{metric2}")
-        ).done((data1, data2 ) => @plotData(data1[0], data2[0], metric1, metric2))
-
-    plotData: (data1, data2, metric1, metric2) ->
-        data = @mergeData(data1, data2)
+    plotData: (xdata, ydata, xlabel, ylabel) ->
+        $("svg").empty()
+        console.log xdata, ydata, xlabel, ylabel
+        data = @mergeData(xdata, ydata)
         values = ([k, v[0], v[1]] for k, v of data)
 
         xscale = d3.scale.linear()
@@ -36,16 +99,16 @@ class Plotter
             .call(yaxis)
 
         # x title
-        @svg.append("text").text(metric1)
+        @svg.append("text").text(xlabel)
             .attr("class", "xlabel")
             .attr("x", Math.round(@w / 2)).attr("y", @h - 8)
 
         # y title
-        y_title_ypos = Math.round(@h / 2)
-        @svg.append("text").text(metric2)
+        ylabel_ypos = Math.round(@h / 2)
+        @svg.append("text").text(ylabel)
             .attr("class", "ylabel")
-            .attr("transform", "rotate(270, 20, #{y_title_ypos})")
-            .attr("x", 20).attr("y", y_title_ypos)
+            .attr("transform", "rotate(270, 20, #{ylabel_ypos})")
+            .attr("x", 20).attr("y", ylabel_ypos)
 
 
         g_objs = @svg.selectAll("g.circ").data(values).enter()
@@ -73,10 +136,19 @@ class Plotter
                 ret[k] = [v, v2]
         return ret
 
+
+# helper functions
+map_object = (obj, func) ->
+    ret = {}
+    for key, value of obj
+        ret[key] = func(value)
+    return ret
+
+# Global objects
+
+plotter = new Plotter()
+metric_watcher = new MetricWatcher(plotter)
+
 $( ->
-    hash = document.location.hash or "#"
-    params = hash.substr(1).split(",")
-    if params[0] and params[1]
-        plotter = new Plotter()
-        plotter.plot(params[0], params[1])
+    metric_watcher.init()
 )

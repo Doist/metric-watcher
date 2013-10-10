@@ -92,6 +92,7 @@ shutdownStores = function() {
 
   stores_file = argv['stores'];
   if (!stores_file) {
+    process.exit();
     return;
   }
   return fs.writeFile(stores_file, JSON.stringify(stores), function(err) {
