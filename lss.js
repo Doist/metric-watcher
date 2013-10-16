@@ -7,6 +7,7 @@ LimitedSizeStore = (function() {
     this.ensure_limit_rate = ensure_limit_rate != null ? ensure_limit_rate : 0.01;
     this.store = {};
     this.ts = {};
+    this.cnt = {};
   }
 
   LimitedSizeStore.prototype.keys = function() {
@@ -30,6 +31,7 @@ LimitedSizeStore = (function() {
     key = key.toString();
     this.store[key] = value;
     this.ts[key] = ts;
+    this.cnt[key] = (this.cnt[key] || 0) + 1;
     if (Math.random() < this.ensure_limit_rate) {
       this.ensureLimit();
     }
@@ -37,7 +39,7 @@ LimitedSizeStore = (function() {
   };
 
   LimitedSizeStore.prototype.get = function(key) {
-    return [this.store[key], this.ts[key]];
+    return [this.store[key], this.ts[key], this.cnt[key] || 0];
   };
 
   LimitedSizeStore.prototype.ensureLimit = function() {
@@ -62,18 +64,30 @@ LimitedSizeStore = (function() {
       element = to_remove[_i];
       delete this.store[element[0]];
       delete this.ts[element[0]];
+      delete this.cnt[element[0]];
     }
     return void 0;
   };
 
-  LimitedSizeStore.prototype.toJSON = function() {
+  LimitedSizeStore.prototype.dump = function(cnt_threshold) {
     var key, ret;
 
+    if (cnt_threshold == null) {
+      cnt_threshold = 0;
+    }
     ret = {};
     for (key in this.store) {
-      ret[key] = this.get(key);
+      if (cnt_threshold === 0 || this.cnt[key] >= cnt_threshold) {
+        ret[key] = this.get(key);
+      }
     }
     return ret;
+  };
+
+  LimitedSizeStore.prototype.toJSON = function() {
+    var cnt_limit;
+
+    return this.dump(cnt_limit = 0);
   };
 
   LimitedSizeStore.prototype.load = function(json) {
@@ -83,7 +97,8 @@ LimitedSizeStore = (function() {
     for (key in json) {
       value = json[key];
       this.store[key] = value[0];
-      _results.push(this.ts[key] = value[1]);
+      this.ts[key] = value[1];
+      _results.push(this.cnt[key] = value[2]);
     }
     return _results;
   };

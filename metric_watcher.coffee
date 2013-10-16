@@ -7,6 +7,7 @@ argv = require('optimist').argv
 lss = require("./lss.js")
 
 stores = {}
+CNT_THRESHOLD = 5
 
 error_handler = (req, res) ->
     res.writeHead(404, {'Content-Type': 'text/plain'})
@@ -15,8 +16,14 @@ error_handler = (req, res) ->
 
 http_handlers = {
     "/metrics/dump": (req, res) ->
+        cnt_threshold = parseInt(req.query.cnt_threshold)
+        if isNaN(cnt_threshold)
+            cnt_threshold = CNT_THRESHOLD
+        ret = {}
+        for k, v of stores
+            ret[k] = v.dump(cnt_threshold)
         res.writeHead(200, {'Content-Type': 'application/json'})
-        res.end(JSON.stringify(stores))
+        res.end(JSON.stringify(ret))
     "/metrics": (req, res) ->
         res.writeHead(200, {'Content-Type': 'application/json'})
         keys = {}
@@ -150,6 +157,11 @@ counter = (key, id, gamma0, timestamp, reset) ->
     store = getStore(key)
 
     [prev_value, prev_timestamp] = store.get(id)
+
+    # ignore this, to avoid having Inf values
+    if timestamp == prev_timestamp
+        return
+
     if reset or not prev_timestamp
         value = undefined
     else
