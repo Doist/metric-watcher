@@ -7,7 +7,7 @@ argv = require('optimist').argv
 lss = require("./lss.js")
 
 stores = {}
-CNT_THRESHOLD = 5
+CNT_THRESHOLD = 10
 
 error_handler = (req, res) ->
     res.writeHead(404, {'Content-Type': 'text/plain'})
