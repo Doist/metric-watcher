@@ -20,7 +20,7 @@ Starting the server
 
 Usage:
 
-    node metric_watcher.js [--tcp-port 1234] \
+    node lib/metric_watcher.js [--tcp-port 1234] \
             [--udp-port 1234] \
             [--store-limit 1000] \
             [--stores filename.json]

@@ -1,22 +1,31 @@
-
 class MetricWatcher
 
     constructor: (@plotter) ->
         @chosen_metrics = []
+        @stores = {}
 
     init: () ->
         @metrics_container = $("#id-metrics-container")
+        @socket = io.connect("http://localhost:1234")
         $.getJSON("/metrics/dump", (data) =>
-            @stores = data
+            for k, v of data
+                store = new LimitedSizeStore()
+                store.load(v)
+                @stores[k] = store
             @displayMetricsList()
+            @socket.on("set_store_value", (data) => @setStoreValue(data)
         )
+
+    setStoreValue: (data) ->
+        @stores[data.store_key].set(data.key, data.value, data.ts)
+        @onChosenMetricUpdated_redraw()
 
     displayMetricsList: () ->
         @metrics_container.empty()
         keys = (name for name of @stores)
         keys.sort()
         for name in keys
-            count = (id for id of @stores[name]).length
+            count = (id for id of @stores[name].values()).length
             li = $('<li class="metric-list-item">')
                     .attr("data-name", name)
 
@@ -51,16 +60,15 @@ class MetricWatcher
             return
 
         if @chosen_metrics.length == 2
-            xdata = map_object(@stores[@chosen_metrics[0]], (v) -> v[0])
+            xdata = @stores[@chosen_metrics[0]].values()
             xlabel = @chosen_metrics[0]
-            ydata = map_object(@stores[@chosen_metrics[1]], (v) -> v[0])
+            ydata = @stores[@chosen_metrics[1]].values()
             ylabel = @chosen_metrics[1]
         else if @chosen_metrics.length == 1
-            xdata = map_object(@stores[@chosen_metrics[0]], (v) -> Math.random())
+            xdata = map_object(@stores[@chosen_metrics[0]].values(), (v) -> Math.random())
             xlabel = 'random'
-            ydata = map_object(@stores[@chosen_metrics[0]], (v) -> v[0])
+            ydata = @stores[@chosen_metrics[0]].values()
             ylabel = @chosen_metrics[0]
-
         plotter.plotData(xdata, ydata, xlabel, ylabel)
 
 
@@ -73,7 +81,6 @@ class Plotter
 
     plotData: (xdata, ydata, xlabel, ylabel) ->
         $("svg").empty()
-        console.log xdata, ydata, xlabel, ylabel
         data = @mergeData(xdata, ydata)
         values = ([k, v[0], v[1]] for k, v of data)
 

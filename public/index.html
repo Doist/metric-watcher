@@ -4,12 +4,12 @@
         <title>Metric watcher</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
-        <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
-            <script src="bootstrap/assets/js/html5shiv.js"></script>
-            <script src="bootstrap/assets/js/respond.min.js"></script>
+            <script src="/components/bootstrap/assets/js/html5shiv.js"></script>
+            <script src="/components/bootstrap/assets/js/respond.min.js"></script>
         <![endif]-->
 
         <style>
@@ -114,10 +114,14 @@
 
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script src="//code.jquery.com/jquery.js"></script>
+        <script src="/components/jquery/jquery.min.js"></script>
+        <!-- socket.io -->
+        <script src="socket.io/socket.io.js"></script>
+
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="d3/d3.min.js"></script>
-        <script src="bootstrap/dist/js/bootstrap.min.js"></script>
-        <script src="js/index.js"></script>
+        <script src="/components/d3/d3.min.js"></script>
+        <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="/js/lib/lss.js"></script>
+        <script src="/js/index.js"></script>
     </body>
 </html>

@@ -12,26 +12,17 @@ MetricWatcher = (function() {
     var _this = this;
 
     this.metrics_container = $("#id-metrics-container");
-    this.socket = io.connect("http://localhost:1234");
     return $.getJSON("/metrics/dump", function(data) {
       var k, store, v;
 
       for (k in data) {
         v = data[k];
-        store = new LimitedSizeStore();
+        store = LimitedSizeStore();
         store.load(v);
         _this.stores[k] = store;
       }
-      _this.displayMetricsList();
-      return _this.socket.on("set_store_value", function(data) {
-        return _this.setStoreValue(data);
-      });
+      return _this.displayMetricsList();
     });
-  };
-
-  MetricWatcher.prototype.setStoreValue = function(data) {
-    this.stores[data.store_key].set(data.key, data.value, data.ts);
-    return this.onChosenMetricUpdated_redraw();
   };
 
   MetricWatcher.prototype.displayMetricsList = function() {
@@ -56,7 +47,7 @@ MetricWatcher = (function() {
         var _results1;
 
         _results1 = [];
-        for (id in this.stores[name].values()) {
+        for (id in this.stores[name]) {
           _results1.push(id);
         }
         return _results1;
@@ -107,16 +98,22 @@ MetricWatcher = (function() {
       return;
     }
     if (this.chosen_metrics.length === 2) {
-      xdata = this.stores[this.chosen_metrics[0]].values();
+      xdata = map_object(this.stores[this.chosen_metrics[0]], function(v) {
+        return v[0];
+      });
       xlabel = this.chosen_metrics[0];
-      ydata = this.stores[this.chosen_metrics[1]].values();
+      ydata = map_object(this.stores[this.chosen_metrics[1]], function(v) {
+        return v[0];
+      });
       ylabel = this.chosen_metrics[1];
     } else if (this.chosen_metrics.length === 1) {
-      xdata = map_object(this.stores[this.chosen_metrics[0]].values(), function(v) {
+      xdata = map_object(this.stores[this.chosen_metrics[0]], function(v) {
         return Math.random();
       });
       xlabel = 'random';
-      ydata = this.stores[this.chosen_metrics[0]].values();
+      ydata = map_object(this.stores[this.chosen_metrics[0]], function(v) {
+        return v[0];
+      });
       ylabel = this.chosen_metrics[0];
     }
     return plotter.plotData(xdata, ydata, xlabel, ylabel);
@@ -141,6 +138,7 @@ Plotter = (function() {
       _this = this;
 
     $("svg").empty();
+    console.log(xdata, ydata, xlabel, ylabel);
     data = this.mergeData(xdata, ydata);
     values = (function() {
       var _results;

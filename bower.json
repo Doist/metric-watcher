@@ -6,6 +6,11 @@
     "Roman Imankulov <roman.imankulov@gmail.com>"
   ],
   "description": "Metric Watcher",
+  "dependencies": {
+    "d3": "",
+    "bootstrap": "",
+    "jquery": ""
+  },
   "main": "metric_watcher.js",
   "license": "BSD",
   "private": true,

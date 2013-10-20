@@ -5,6 +5,8 @@
 #
 # You may set up the store limit, the frequency of "cleaning up procedure",
 
+
+
 class LimitedSizeStore
 
     constructor: (@limit=1000, @ensure_limit_rate=0.01) ->
@@ -63,4 +65,5 @@ class LimitedSizeStore
             @cnt[key] = value[2]
 
 
-exports.LimitedSizeStore = LimitedSizeStore
+if exports?
+    exports.LimitedSizeStore = LimitedSizeStore

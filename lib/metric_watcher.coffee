@@ -1,13 +1,15 @@
 fs = require("fs")
 url = require("url")
 http = require("http")
+socket_io = require("socket.io")
 connect = require("connect")
 dgram = require("dgram")
 argv = require('optimist').argv
 lss = require("./lss.js")
 
+io = null
 stores = {}
-CNT_THRESHOLD = 10
+CNT_THRESHOLD = 0
 
 error_handler = (req, res) ->
     res.writeHead(404, {'Content-Type': 'text/plain'})
@@ -113,11 +115,14 @@ startUDP = (udp_port) ->
 
 
 startHTTP = (http_port) ->
-
-    connect()
+    app = connect()
         .use(connect.logger('dev'))
-        .use(connect.static("#{__dirname}/public"))
-        .use(connect.static("#{__dirname}/bower_components"))
+        # js libs
+        .use("/js/lib", connect.static("#{__dirname}"))
+        # pure client-side html/css/js files, etc
+        .use(connect.static("#{__dirname}/../public"))
+        # bower-installed components
+        .use("/components", connect.static("#{__dirname}/../bower_components"))
         .use(connect.query())
         .use((req, res) ->
             url_data = url.parse(req.url);
@@ -127,8 +132,10 @@ startHTTP = (http_port) ->
             else
                 handler(req, res)
         )
-        .listen(1234)
 
+    srv = http.createServer(app)
+    io = socket_io.listen(srv)
+    srv.listen(http_port)
     console.log("HTTP server running at http://0.0.0.0:#{http_port}/")
 
 
@@ -148,6 +155,9 @@ gauge = (key, id, value, gamma0, timestamp, reset) ->
     gamma = 1.0 / (dt / gamma0 + 1)
     new_value = gamma * prev_value + (1 - gamma) * value
     store.set(id, new_value, timestamp)
+    io.sockets.emit("set_store_value", {
+        store_key: key, key: id, value: new_value, ts: timestamp
+    })
     return new_value
 
 
