@@ -23,15 +23,30 @@ MetricWatcher = (function() {
         _this.stores[k] = store;
       }
       _this.displayMetricsList();
-      return _this.socket.on("set_store_value", function(data) {
-        return _this.setStoreValue(data);
+      return _this.socket.on("set_store_values", function(data) {
+        return _this.setStoreValues(data);
       });
     });
   };
 
-  MetricWatcher.prototype.setStoreValue = function(data) {
-    this.stores[data.store_key].set(data.key, data.value, data.ts);
-    return this.onChosenMetricUpdated_redraw();
+  MetricWatcher.prototype.setStoreValues = function(data) {
+    var key, record, store, store_key, ts, value, _i, _len, _results;
+
+    _results = [];
+    for (_i = 0, _len = data.length; _i < _len; _i++) {
+      record = data[_i];
+      store_key = record[0], key = record[1], value = record[2], ts = record[3];
+      store = this.stores[store_key];
+      if (!store) {
+        store = new LimitedSizeStore();
+        this.stores[store_key] = store;
+      }
+      store.set(key, value, ts);
+      this.displayMetricsList();
+      this.onChosenMetricUpdated_markList();
+      _results.push(this.onChosenMetricUpdated_redraw());
+    }
+    return _results;
   };
 
   MetricWatcher.prototype.displayMetricsList = function() {

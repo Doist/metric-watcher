@@ -13,12 +13,20 @@ class MetricWatcher
                 store.load(v)
                 @stores[k] = store
             @displayMetricsList()
-            @socket.on("set_store_value", (data) => @setStoreValue(data)
+            @socket.on("set_store_values", (data) => @setStoreValues(data))
         )
 
-    setStoreValue: (data) ->
-        @stores[data.store_key].set(data.key, data.value, data.ts)
-        @onChosenMetricUpdated_redraw()
+    setStoreValues: (data) ->
+        for record in data
+            [store_key, key, value, ts] = record
+            store = @stores[store_key]
+            if not store
+                store = new LimitedSizeStore()
+                @stores[store_key] = store
+            store.set(key, value, ts)
+            @displayMetricsList()
+            @onChosenMetricUpdated_markList()
+            @onChosenMetricUpdated_redraw()
 
     displayMetricsList: () ->
         @metrics_container.empty()

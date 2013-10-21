@@ -87,10 +87,3 @@ RESTful API
 - `/metrics`: get the dict `metric name -> number of unique element in metric`
 - `/metrics/get?name=<metric_name>`: for a given metric name get the dict
   `user id -> metric value`
-
-
-`/index.html`
-``````````````
-
-Accepts hash parameters `#metric_name1,metric_name2` and plots the scatterplot
-with corresponding values.

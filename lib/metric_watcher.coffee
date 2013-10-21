@@ -7,8 +7,8 @@ dgram = require("dgram")
 argv = require('optimist').argv
 lss = require("./lss.js")
 
-io = null
 stores = {}
+socket_buffer = []
 CNT_THRESHOLD = 0
 
 error_handler = (req, res) ->
@@ -134,9 +134,17 @@ startHTTP = (http_port) ->
         )
 
     srv = http.createServer(app)
-    io = socket_io.listen(srv)
     srv.listen(http_port)
     console.log("HTTP server running at http://0.0.0.0:#{http_port}/")
+    return srv
+
+startSocket = (srv) ->
+    io = socket_io.listen(srv)
+    setInterval(() ->
+        if socket_buffer.length > 0
+           io.sockets.emit("set_store_values", socket_buffer)
+           socket_buffer = []
+    , 2000)
 
 
 gauge = (key, id, value, gamma0, timestamp, reset) ->
@@ -155,9 +163,7 @@ gauge = (key, id, value, gamma0, timestamp, reset) ->
     gamma = 1.0 / (dt / gamma0 + 1)
     new_value = gamma * prev_value + (1 - gamma) * value
     store.set(id, new_value, timestamp)
-    io.sockets.emit("set_store_value", {
-        store_key: key, key: id, value: new_value, ts: timestamp
-    })
+    socket_buffer.push([key, id, new_value, timestamp])
     return new_value
 
 
@@ -189,4 +195,5 @@ getStore = (key) ->
 
 initStores(argv['stores'])
 startUDP(argv['udp-port'] or 1234)
-startHTTP(argv['http-port'] or 1234)
+srv = startHTTP(argv['http-port'] or 1234)
+startSocket(srv)
